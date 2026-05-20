@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-// Change this to your computer's LAN IP for real device
-// Find it with: ipconfig (Windows) or ifconfig (Mac/Linux)
-// Example: http://192.168.1.100:8080/api
-const API_BASE = 'http://192.168.1.94:8080/api';
+// Use public cloud URL if defined in environment, else fallback to local network
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.94:8080/api';
 
 const api = axios.create({
   baseURL: API_BASE,

@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
+@CrossOrigin("*")
 public class ApiController {
     private final SearchService searchService;
     private final Map<String, AtomicInteger> requestCountsPerIp = new ConcurrentHashMap<>();
