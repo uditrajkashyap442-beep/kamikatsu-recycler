@@ -201,7 +201,10 @@ Modern green theme emphasizing sustainability:
 3. ✅ Install mobile dependencies
 4. ✅ Update API endpoint for your network
 5. ✅ Run Expo development server
-6. 📱 Test on device
+6. ✅ Test on device via Expo Go
+7. ✅ Build native Android APK (`npx eas build`)
+8. ✅ Configure Windows Firewall for physical device API access
+9. 🚀 Deploy backend to cloud for public beta testing
 
 ## Support
 
