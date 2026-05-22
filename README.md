@@ -39,7 +39,6 @@ kamikatsu-complete-fixed/
 2. **Update Database Password**
    - Edit `kamikatsu-api/src/main/resources/application.yml`
    - Line 11: Set `password:` to your PostgreSQL password
-   - Default: `postgres123`
 
 3. **Run Backend**
    ```bash
