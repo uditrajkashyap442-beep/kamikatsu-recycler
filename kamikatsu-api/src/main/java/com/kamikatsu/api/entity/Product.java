@@ -20,10 +20,10 @@ public class Product {
     private Category category;
     
     @Column(nullable = false)
-    @FullTextField(analyzer = "kuromoji")
+    @FullTextField
     private String name;
     
-    @FullTextField(analyzer = "kuromoji")
+    @FullTextField
     private String description;
     @Enumerated(EnumType.STRING)
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
