@@ -42,7 +42,7 @@
     </dependency>
     <dependency>
       <groupId>org.hibernate.search</groupId>
-      <artifactId>hibernate-search-backend-elasticsearch</artifactId>
+      <artifactId>hibernate-search-backend-lucene</artifactId>
       <version>7.1.0.Final</version>
     </dependency>
 
