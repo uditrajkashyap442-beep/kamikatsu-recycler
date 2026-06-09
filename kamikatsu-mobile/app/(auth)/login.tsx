@@ -14,7 +14,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       setError('Please enter your email and password.');
       return;
@@ -23,16 +23,32 @@ export default function LoginScreen() {
     setError('');
     setLoading(true);
     
-    // Simulate network request for beta testing
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const { loginUser } = await import('@/lib/api');
+      const response = await loginUser({ email, password });
       setUser({
-        id: Math.random().toString(36).substring(7),
-        email: email,
-        name: email.split('@')[0],
+        id: response.id.toString(),
+        email: response.email,
+        name: response.name,
+        points: response.points,
+        token: response.token,
       });
       router.replace('/(tabs)');
-    }, 1200);
+    } catch (err: any) {
+      let errorMessage = 'Failed to log in. Check credentials.';
+      if (err.response?.data) {
+        if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        } else if (err.response.data.error) {
+          errorMessage = err.response.data.error;
+        } else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

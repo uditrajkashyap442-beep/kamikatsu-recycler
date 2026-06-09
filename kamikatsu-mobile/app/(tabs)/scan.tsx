@@ -20,6 +20,9 @@ export default function ScanScreen() {
   
   const addPoints = useAppStore((state) => state.addPoints);
   const sessionId = useAppStore((state) => state.sessionId);
+  const user = useAppStore((state) => state.user);
+
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (!isFocused) {
@@ -50,8 +53,6 @@ export default function ScanScreen() {
     );
   }
 
-  const [isProcessing, setIsProcessing] = useState(false);
-
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     if (!isScanning.current) return;
     isScanning.current = false;
@@ -64,7 +65,7 @@ export default function ScanScreen() {
       const code = parts[parts.length - 1].split('?')[0].trim();
       
       addPoints(10);
-      logQrScan(null, code, sessionId).catch((e: any) => console.error("Category QR Log failed", e));
+      logQrScan(null, code, sessionId, user?.id?.toString()).catch((e: any) => console.error("Category QR Log failed", e));
       
       Alert.alert('Chiri-Tsumo Points! ♻️', 'You earned +10 points for sorting and depositing your waste!', [
         { 
@@ -84,7 +85,7 @@ export default function ScanScreen() {
       const product = await getProductByBarcode(data);
       if (product && product.category) {
         if (product.id) {
-          logQrScan(product.id, null, sessionId).catch((e: any) => console.error("QR Log failed", e));
+          logQrScan(product.id, null, sessionId, user?.id?.toString()).catch((e: any) => console.error("QR Log failed", e));
         }
         router.push(`/category/${product.category.code}?scannedProduct=${encodeURIComponent(product.name)}`);
         setTimeout(() => { isScanning.current = true; setIsProcessing(false); }, 1500);

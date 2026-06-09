@@ -9,6 +9,12 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const router = useRouter();
   const points = useAppStore((state) => state.points);
+  const setUser = useAppStore((state) => state.setUser);
+
+  const handleLogout = () => {
+    setUser(null);
+    router.replace('/(auth)/login');
+  };
 
   return (
     <ScrollView
@@ -20,7 +26,9 @@ export default function HomeScreen() {
       <View style={styles.heroContainer}>
         <View style={styles.heroTopRow}>
           <Text style={styles.heroLogoText}>Kamikatsu®</Text>
-          <Ionicons name="leaf" size={24} color={Colors.primary} />
+          <TouchableOpacity onPress={handleLogout} style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons name="log-out-outline" size={24} color={Colors.primary} />
+          </TouchableOpacity>
         </View>
         
         <View style={styles.heroTitleContainer}>

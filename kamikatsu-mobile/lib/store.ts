@@ -6,6 +6,8 @@ interface User {
   id: string;
   email: string;
   name: string;
+  points: number;
+  token: string;
 }
 
 interface AppStore {
@@ -27,7 +29,10 @@ export const useAppStore = create<AppStore>()(
       sessionId: '',
       setSessionId: (id) => set({ sessionId: id }),
       points: 0,
-      addPoints: (amount) => set((state) => ({ points: state.points + amount })),
+      addPoints: (amount) => set((state) => ({ 
+        points: state.points + amount,
+        user: state.user ? { ...state.user, points: state.user.points + amount } : null
+      })),
       recentSearches: [],
       addRecentSearch: (query) =>
         set((state) => ({

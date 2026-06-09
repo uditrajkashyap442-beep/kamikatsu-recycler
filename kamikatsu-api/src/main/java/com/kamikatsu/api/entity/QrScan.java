@@ -14,14 +14,19 @@ public class QrScan {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+    
     private String userSessionId;
     private LocalDateTime scannedAt;
 
     public QrScan() {}
 
-    public QrScan(Integer id, Product product, String userSessionId, LocalDateTime scannedAt) {
+    public QrScan(Integer id, Product product, User user, String userSessionId, LocalDateTime scannedAt) {
         this.id = id;
         this.product = product;
+        this.user = user;
         this.userSessionId = userSessionId;
         this.scannedAt = scannedAt;
     }
@@ -37,6 +42,10 @@ public class QrScan {
     public String getUserSessionId() { return userSessionId; }
 
     public void setUserSessionId(String userSessionId) { this.userSessionId = userSessionId; }
+
+    public User getUser() { return user; }
+
+    public void setUser(User user) { this.user = user; }
 
     public LocalDateTime getScannedAt() { return scannedAt; }
 

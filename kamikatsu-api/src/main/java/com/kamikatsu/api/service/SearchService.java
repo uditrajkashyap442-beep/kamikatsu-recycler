@@ -32,6 +32,7 @@ public class SearchService {
     private final CategoryRepository categoryRepository;
     private final MainTypeRepository mainTypeRepository;
     private final QrScanRepository qrScanRepository;
+    private final UserRepository userRepository;
     private final GeminiClassifier geminiClassifier;
     private final HeuristicClassifier heuristicClassifier;
     private final ObjectMapper objectMapper;
@@ -220,7 +221,7 @@ public class SearchService {
     }
 
     @Transactional
-    public void recordQrScan(Integer productId, String categoryCode, String sessionId) {
+    public void recordQrScan(Integer productId, String categoryCode, String sessionId, Long userId) {
         Product product = null;
         if (productId != null) {
             product = productRepository.findById(productId).orElse(null);
@@ -250,6 +251,16 @@ public class SearchService {
             QrScan scan = new QrScan();
             scan.setProduct(product);
             scan.setUserSessionId(sessionId);
+            
+            if (userId != null) {
+                User user = userRepository.findById(userId).orElse(null);
+                if (user != null) {
+                    scan.setUser(user);
+                    user.setPoints(user.getPoints() + 10);
+                    userRepository.save(user);
+                }
+            }
+            
             scan.setScannedAt(LocalDateTime.now());
             qrScanRepository.save(scan);
         }
@@ -469,6 +480,7 @@ public class SearchService {
                          CategoryRepository categoryRepository,
                          MainTypeRepository mainTypeRepository,
                          QrScanRepository qrScanRepository,
+                         UserRepository userRepository,
                          GeminiClassifier geminiClassifier,
                          HeuristicClassifier heuristicClassifier,
                          ObjectMapper objectMapper) {
@@ -476,6 +488,7 @@ public class SearchService {
         this.categoryRepository = categoryRepository;
         this.mainTypeRepository = mainTypeRepository;
         this.qrScanRepository = qrScanRepository;
+        this.userRepository = userRepository;
         this.geminiClassifier = geminiClassifier;
         this.heuristicClassifier = heuristicClassifier;
         this.objectMapper = objectMapper;

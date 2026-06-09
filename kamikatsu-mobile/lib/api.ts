@@ -112,7 +112,8 @@ export const getProductsByCategoryCode = async (code: string): Promise<ProductDt
 export const logQrScan = async (
   productId: number | null,
   categoryCode: string | null,
-  sessionId: string
+  sessionId: string,
+  userId?: string
 ): Promise<boolean> => {
   try {
     await api.post('/qr-scan', null, {
@@ -120,6 +121,7 @@ export const logQrScan = async (
         productId: productId ?? undefined,
         categoryCode: categoryCode ?? undefined,
         sessionId,
+        userId: userId ?? undefined,
       },
     });
     return true;
@@ -127,6 +129,16 @@ export const logQrScan = async (
     console.error('QR scan log error:', error);
     return false;
   }
+};
+
+export const registerUser = async (data: any) => {
+  const response = await api.post('/auth/register', data);
+  return response.data;
+};
+
+export const loginUser = async (data: any) => {
+  const response = await api.post('/auth/login', data);
+  return response.data;
 };
 
 export default api;

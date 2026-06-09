@@ -72,8 +72,9 @@ public class ApiController {
     public ResponseEntity<Void> logQrScan(
             @RequestParam(required = false) Integer productId,
             @RequestParam(required = false) String categoryCode,
-            @RequestParam(required = false) String sessionId) {
-        searchService.recordQrScan(productId, categoryCode, sessionId);
+            @RequestParam(required = false) String sessionId,
+            @RequestParam(required = false) Long userId) {
+        searchService.recordQrScan(productId, categoryCode, sessionId, userId);
         return ResponseEntity.ok().build();
     }
 

@@ -15,7 +15,7 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !password) {
       setError('Please fill in all fields.');
       return;
@@ -24,16 +24,32 @@ export default function RegisterScreen() {
     setError('');
     setLoading(true);
     
-    // Simulate network request for beta testing
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const { registerUser } = await import('@/lib/api');
+      const response = await registerUser({ name, email, password });
       setUser({
-        id: Math.random().toString(36).substring(7),
-        email: email,
-        name: name,
+        id: response.id.toString(),
+        email: response.email,
+        name: response.name,
+        points: response.points,
+        token: response.token,
       });
       router.replace('/(tabs)');
-    }, 1200);
+    } catch (err: any) {
+      let errorMessage = 'Failed to register. Please try again.';
+      if (err.response?.data) {
+        if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        } else if (err.response.data.error) {
+          errorMessage = err.response.data.error;
+        } else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      }
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
