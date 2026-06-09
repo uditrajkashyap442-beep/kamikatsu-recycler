@@ -24,14 +24,14 @@ public class ApiController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> search(@RequestParam String q, HttpServletRequest request) {
+    public ResponseEntity<?> search(@RequestParam String q, @RequestParam(defaultValue = "false") boolean useAi, HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         AtomicInteger count = requestCountsPerIp.computeIfAbsent(ip, k -> new AtomicInteger(0));
         if (count.incrementAndGet() > 60) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body("Rate limit exceeded. Try again in a minute.");
         }
         
-        List<SearchResultDto> results = searchService.searchProducts(q);
+        List<SearchResultDto> results = searchService.searchProducts(q, useAi);
         return ResponseEntity.ok(results);
     }
 

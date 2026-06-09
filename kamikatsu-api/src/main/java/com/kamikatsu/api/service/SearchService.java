@@ -40,7 +40,7 @@ public class SearchService {
     private EntityManager entityManager;
 
     @Transactional
-    public List<SearchResultDto> searchProducts(String query) {
+    public List<SearchResultDto> searchProducts(String query, boolean useAi) {
         if (query == null || query.isBlank()) {
             return List.of();
         }
@@ -91,8 +91,8 @@ public class SearchService {
             }
         }
 
-        // 3. Fallback to Open Food Facts, Gemini AI, and Heuristics if no local product matches
-        if (results.isEmpty() || hits.isEmpty()) {
+        // 3. Fallback to Open Food Facts, Gemini AI, and Heuristics if no local product matches AND useAi is true
+        if ((results.isEmpty() || hits.isEmpty()) && useAi) {
             // First: Search Open Food Facts to fetch external product details
             String offInfo = fetchProductFromOpenFoodFacts(query);
 

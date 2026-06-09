@@ -198,17 +198,31 @@ export default function ProductDetailsScreen() {
 
       {/* Sticky Bottom Overlay Banner for Kurukuru Shop */}
       {product.kurukuruLocation ? (
-        <View style={styles.tealOverlayBanner}>
+        <TouchableOpacity 
+          style={styles.tealOverlayBanner}
+          activeOpacity={0.9}
+          onPress={() => {
+            import('react-native').then(({ Linking, Platform }) => {
+              const url = Platform.select({
+                ios: 'maps:0,0?q=Kamikatsu+Zero+Waste+Center',
+                android: 'geo:0,0?q=Kamikatsu+Zero+Waste+Center',
+                default: 'https://www.google.com/maps/search/?api=1&query=Kamikatsu+Zero+Waste+Center'
+              });
+              Linking.openURL(url as string);
+            });
+          }}
+        >
           <View style={styles.tealBannerContent}>
             <View style={styles.tealBannerIconCircle}>
-              <Ionicons name="gift-outline" size={20} color="#0D7377" />
+              <Ionicons name="location-outline" size={20} color="#0D7377" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.tealBannerTitle}>Take to Kurukuru shop.</Text>
-              <Text style={styles.tealBannerDesc} numberOfLines={1}>Location: {product.kurukuruLocation}</Text>
+              <Text style={styles.tealBannerTitle}>Take to Kurukuru shop</Text>
+              <Text style={styles.tealBannerDesc} numberOfLines={1}>Tap to get directions</Text>
             </View>
+            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
           </View>
-        </View>
+        </TouchableOpacity>
       ) : null}
     </View>
   );

@@ -50,6 +50,8 @@ export default function ScanScreen() {
     );
   }
 
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     if (!isScanning.current) return;
     isScanning.current = false;
@@ -61,10 +63,7 @@ export default function ScanScreen() {
       const parts = normalizedData.split('/');
       const code = parts[parts.length - 1].split('?')[0].trim();
       
-      // Award Chiri-tsumo points for depositing waste at the station
       addPoints(10);
-      
-      // Log category QR scan in backend database
       logQrScan(null, code, sessionId).catch((e: any) => console.error("Category QR Log failed", e));
       
       Alert.alert('Chiri-Tsumo Points! ♻️', 'You earned +10 points for sorting and depositing your waste!', [
@@ -79,6 +78,7 @@ export default function ScanScreen() {
       return;
     } 
     
+    setIsProcessing(true);
     // Treat as hardware barcode (JAN/EAN/UPC)
     try {
       const product = await getProductByBarcode(data);
@@ -86,15 +86,16 @@ export default function ScanScreen() {
         if (product.id) {
           logQrScan(product.id, null, sessionId).catch((e: any) => console.error("QR Log failed", e));
         }
-        // Direct to Category page as requested by user, passing product name to display details contextually
         router.push(`/category/${product.category.code}?scannedProduct=${encodeURIComponent(product.name)}`);
-        setTimeout(() => { isScanning.current = true; }, 1500);
+        setTimeout(() => { isScanning.current = true; setIsProcessing(false); }, 1500);
       } else {
-        Alert.alert('Not Found', 'This barcode is not registered in the zero-waste database.', [
+        setIsProcessing(false);
+        Alert.alert('Not Found', 'This barcode could not be identified by the zero-waste AI.', [
           { text: 'OK', onPress: () => { isScanning.current = true; } }
         ]);
       }
     } catch (error) {
+      setIsProcessing(false);
       Alert.alert('Error', 'Failed to fetch barcode data.', [
         { text: 'OK', onPress: () => { isScanning.current = true; } }
       ]);
@@ -103,6 +104,12 @@ export default function ScanScreen() {
 
   return (
     <View style={styles.container}>
+      {isProcessing && (
+        <View style={styles.processingOverlay}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.processingText}>🤖 AI is identifying this item...</Text>
+        </View>
+      )}
       <CameraView
         style={StyleSheet.absoluteFillObject}
         onBarcodeScanned={handleBarCodeScanned}
@@ -257,5 +264,18 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  processingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  processingText: {
+    marginTop: Spacing.md,
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.ink,
   },
 });

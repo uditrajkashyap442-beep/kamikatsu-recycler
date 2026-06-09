@@ -1,12 +1,20 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
 // Use public cloud URL if defined in environment, else fallback to local network
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.94:8080/api';
+const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'https://kamikatsu-recycler.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_BASE,
-  timeout: 10000,
+  timeout: 30000,
 });
+
+export let searchCancelTokenSource = axios.CancelToken.source();
+
+export const cancelPendingSearch = () => {
+  searchCancelTokenSource.cancel('Operation canceled by user due to new typing.');
+  searchCancelTokenSource = axios.CancelToken.source();
+};
 
 export interface ProductDto {
   id: number;
@@ -48,10 +56,11 @@ export interface SearchResultDto {
   categoryCode: string | null;
 }
 
-export const searchProducts = async (query: string): Promise<SearchResultDto[]> => {
+export const searchProducts = async (query: string, useAi: boolean = false): Promise<SearchResultDto[]> => {
   try {
     const response = await api.get<SearchResultDto[]>('/search', {
-      params: { q: query },
+      params: { q: query, useAi: useAi.toString() },
+      cancelToken: searchCancelTokenSource.token,
     });
     return response.data;
   } catch (error) {

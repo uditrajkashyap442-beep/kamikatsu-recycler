@@ -21,32 +21,61 @@ export default function SearchScreen() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResultDto[]>([]);
   const [loading, setLoading] = useState(false);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const localDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const aiDebounceTimer = useRef<NodeJS.Timeout | null>(null);
   const recentSearches = useAppStore((state) => state.recentSearches);
   const addRecentSearch = useAppStore((state) => state.addRecentSearch);
 
   useEffect(() => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
+    import('@/lib/api').then(({ cancelPendingSearch }) => {
+      cancelPendingSearch();
+    });
+
+    if (localDebounceTimer.current) clearTimeout(localDebounceTimer.current);
+    if (aiDebounceTimer.current) clearTimeout(aiDebounceTimer.current);
 
     if (query.trim().length === 0) {
       setResults([]);
       return;
     }
 
+    if (query.trim().length < 3) {
+      return; // Wait for at least 3 characters before hitting the API
+    }
+
     setLoading(true);
-    // Strict 350ms debounce
-    debounceTimer.current = setTimeout(async () => {
-      const data = await searchProducts(query);
-      setResults(data);
-      setLoading(false);
-    }, 350);
+    setAiLoading(false);
+
+    // 1. Instant Local Search (250ms debounce)
+    localDebounceTimer.current = setTimeout(async () => {
+      try {
+        const data = await searchProducts(query, false);
+        setResults(data);
+        setLoading(false);
+
+        // 2. If no local results, schedule the deep AI Search (1500ms pause)
+        if (data.length === 0) {
+          aiDebounceTimer.current = setTimeout(async () => {
+            setAiLoading(true);
+            try {
+              const aiData = await searchProducts(query, true);
+              setResults(aiData);
+            } catch (e) {
+              // Handle cancelled requests
+            } finally {
+              setAiLoading(false);
+            }
+          }, 1500);
+        }
+      } catch (e) {
+        setLoading(false);
+      }
+    }, 250);
 
     return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
+      if (localDebounceTimer.current) clearTimeout(localDebounceTimer.current);
+      if (aiDebounceTimer.current) clearTimeout(aiDebounceTimer.current);
     };
   }, [query]);
 
@@ -193,14 +222,24 @@ export default function SearchScreen() {
               </View>
             )}
 
-            {/* No Results */}
+            {/* No Results or AI Searching */}
             {!loading && results.length === 0 && (
               <View style={styles.emptyState}>
-                <Ionicons name="search-outline" size={48} color={Colors.inkSoft} style={{marginBottom: 16}} />
-                <Text style={styles.emptyTitle}>No items found</Text>
-                <Text style={styles.emptySubtitle}>
-                  Try searching for different keywords
-                </Text>
+                {aiLoading ? (
+                  <>
+                    <ActivityIndicator size="large" color={Colors.primary} style={{ marginBottom: 16 }} />
+                    <Text style={styles.emptyTitle}>AI is searching...</Text>
+                    <Text style={styles.emptySubtitle}>Scouring the web and database for "{query}"</Text>
+                  </>
+                ) : (
+                  <>
+                    <Ionicons name="search-outline" size={48} color={Colors.inkSoft} style={{marginBottom: 16}} />
+                    <Text style={styles.emptyTitle}>No items found</Text>
+                    <Text style={styles.emptySubtitle}>
+                      Try searching for different keywords
+                    </Text>
+                  </>
+                )}
               </View>
             )}
           </>
